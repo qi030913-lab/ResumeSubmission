@@ -24,27 +24,25 @@ class BossAndroidAdapter(PlatformAdapter):
         return None
 
     async def start_chat(self) -> dict:
-        selector_candidates = [
-            {"text": "立即沟通"},
-            {"content_desc": "立即沟通"},
-        ]
+        clicked = await self.driver.tap_by_text("立即沟通")
         return {
             "action": "start_chat",
-            "status": "pending_driver_implementation",
-            "selector_candidates": selector_candidates,
+            "status": "success" if clicked else "element_not_found",
+            "selector_candidates": [{"text": "立即沟通"}, {"content_desc": "立即沟通"}],
         }
 
     async def send_greeting(self, message: str) -> dict:
+        await self.driver.type_text(message)
+        sent = await self.driver.send_current_text()
         return {
             "action": "send_greeting",
-            "status": "pending_driver_implementation",
+            "status": "success" if sent else "send_failed",
             "message_preview": message,
         }
 
     async def send_resume(self, resume_id: str) -> dict:
         return {
             "action": "send_resume",
-            "status": "pending_driver_implementation",
+            "status": "manual_step_required",
             "resume_id": resume_id,
         }
-

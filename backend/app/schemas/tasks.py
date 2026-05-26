@@ -2,7 +2,9 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from app.schemas.common import ORMModel
 
 
 class TaskStatus(StrEnum):
@@ -23,7 +25,7 @@ class TaskActionType(StrEnum):
     FOLLOW_UP_CHAT = "follow_up_chat"
 
 
-class TaskCreate(BaseModel):
+class TaskCreate(ORMModel):
     platform_code: str = Field(..., examples=["boss_android"])
     platform_type: str = Field(..., examples=["android_app"])
     action_type: TaskActionType
@@ -32,10 +34,11 @@ class TaskCreate(BaseModel):
     profile_id: str
     message_template_id: str | None = None
     requires_manual_review: bool = True
+    priority: int = 0
     payload: dict[str, Any] = Field(default_factory=dict)
 
 
-class TaskRead(BaseModel):
+class TaskRead(ORMModel):
     id: str
     platform_code: str
     platform_type: str
@@ -45,18 +48,25 @@ class TaskRead(BaseModel):
     profile_id: str
     message_template_id: str | None = None
     requires_manual_review: bool
+    priority: int
     payload: dict[str, Any] = Field(default_factory=dict)
+    worker_job_id: str | None = None
+    error_message: str | None = None
     status: TaskStatus
+    dispatched_at: datetime | None = None
+    scheduled_at: datetime
     created_at: datetime
     updated_at: datetime
 
 
-class TaskStatusUpdate(BaseModel):
+class TaskStatusUpdate(ORMModel):
     status: TaskStatus
+    error_message: str | None = None
 
 
-class TaskDispatchResponse(BaseModel):
+class TaskDispatchResponse(ORMModel):
     task_id: str
     celery_job_id: str
-    status: str
+    dispatch_status: str
+    task_status: TaskStatus
 

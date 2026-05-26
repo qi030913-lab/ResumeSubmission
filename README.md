@@ -7,7 +7,7 @@
 3. 自动发送首句
 4. 记录任务状态和执行结果
 
-这个仓库现在不是成品，而是一个已经搭好方向和骨架的起点：架构文档、数据设计、API 设计、后端控制平面、Celery 任务入口、Boss Android Adapter 占位都已经落地。
+这个仓库现在不是成品，但已经不是空骨架了：架构文档、数据设计、API 设计、数据库模型、后端控制平面、Celery 任务入口，以及一条可执行的 Boss Android 模拟任务链路都已经落地。
 
 ## 项目目标
 
@@ -32,14 +32,15 @@
 - 项目目录结构设计
 - 数据库表设计草案
 - API 设计草案
-- FastAPI 基础骨架
-- Celery worker 入口
-- Boss Android adapter / Android driver 接口定义
-- 基础任务服务和一个简单测试
+- SQLAlchemy 数据模型和 SQLite 本地持久化
+- FastAPI CRUD API
+- Celery worker 入口和本地 eager 执行
+- Boss Android adapter / mock Android driver
+- 任务执行记录、去重记录、执行日志落库
+- 基础测试通过
 
 暂未完成：
 
-- PostgreSQL + SQLAlchemy 真正落库
 - Alembic 迁移
 - 真实 Appium driver 实现
 - 真实 Boss `立即沟通` 点击链路
@@ -172,20 +173,30 @@ celery -A app.workers.celery_app:celery_app worker --loglevel=info
 
 ## 当前可用接口
 
-已经有基础骨架的接口：
+当前已经有一版可用接口：
 
 - `GET /api/v1/health`
 - `GET /api/v1/ready`
 - `GET /api/v1/platforms`
 - `GET /api/v1/platforms/{platform_code}`
 - `POST /api/v1/platforms`
+- `GET /api/v1/devices`
+- `POST /api/v1/devices`
+- `GET /api/v1/profiles`
+- `POST /api/v1/profiles`
+- `GET /api/v1/jobs`
+- `POST /api/v1/jobs`
+- `GET /api/v1/message-templates`
+- `POST /api/v1/message-templates`
 - `GET /api/v1/tasks`
 - `GET /api/v1/tasks/{task_id}`
 - `POST /api/v1/tasks`
 - `POST /api/v1/tasks/{task_id}/dispatch`
 - `PATCH /api/v1/tasks/{task_id}/status`
+- `GET /api/v1/runs`
+- `GET /api/v1/runs/{run_id}`
 
-注意：当前任务数据还是**内存存储**，服务重启后会丢失。
+注意：当前数据已经是**数据库持久化**，默认本地使用 SQLite；生产化时建议切到 PostgreSQL。
 
 ## Boss Android MVP 路线
 
@@ -199,11 +210,11 @@ celery -A app.workers.celery_app:celery_app worker --loglevel=info
 
 建议开发顺序：
 
-1. 接 SQLAlchemy 模型
-2. 接 Alembic 初始迁移
-3. 接 Appium Android driver
-4. 把 `boss_android_adapter.py` 里的占位逻辑换成真实点击流程
-5. 增加截图和失败日志
+1. 接 Alembic 初始迁移
+2. 接真实 Appium Android driver
+3. 把 `boss_android_adapter.py` 的 mock 点击替换成真实设备操作
+4. 增加截图归档和失败回放
+5. 增加风控识别和人工审核流
 
 ## 相关文档
 
@@ -225,6 +236,5 @@ celery -A app.workers.celery_app:celery_app worker --loglevel=info
 
 最值得立刻继续的两块：
 
-- 把内存任务服务替换成 `PostgreSQL + SQLAlchemy + Alembic`
+- 接上 `PostgreSQL + Alembic`
 - 开始实现 Boss Android 的 `Appium + ADB` 真正执行链路
-

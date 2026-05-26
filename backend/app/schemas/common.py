@@ -1,7 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
-class HealthResponse(BaseModel):
+class ORMModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+
+class HealthResponse(ORMModel):
     status: str
     service: str
-
+    database: str | None = None
