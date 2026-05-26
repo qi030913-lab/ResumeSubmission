@@ -81,7 +81,7 @@ class TaskExecutor:
                 outputs.append({"screen": await adapter.detect_screen()})
                 if task.action_type == TaskActionType.START_CHAT.value:
                     outputs.append(await adapter.start_chat())
-                    if task.payload.get("send_greeting", True):
+                    if self._should_send_greeting(task):
                         message = render_message_template(template, job, profile)
                         outputs.append(await adapter.send_greeting(message))
                 elif task.action_type == TaskActionType.SEND_RESUME.value:
@@ -153,3 +153,8 @@ class TaskExecutor:
     def _dedupe_key(self, task: ApplicationTask, job: Job) -> str:
         recruiter = job.recruiter_id or "unknown-recruiter"
         return f"{task.platform_code}:{recruiter}:{job.id}:{task.action_type}"
+
+    def _should_send_greeting(self, task: ApplicationTask) -> bool:
+        if task.platform_code == "boss_android":
+            return False
+        return bool(task.payload.get("send_greeting", True))

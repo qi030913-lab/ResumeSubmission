@@ -78,4 +78,5 @@ APPIUM_APP_ACTIVITY=
 - `boss_android` 平台会在启动时自动初始化
 - Celery 默认支持本地 eager 执行，方便先跑通链路
 - 已补 `Appium + ADB` 真机 driver 结构
+- Boss `start_chat` 默认只点击 `立即沟通`，利用 App 自动发送常用短语
 - 真实 Boss 元素定位和选择器仍然需要继续采集

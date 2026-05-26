@@ -50,12 +50,11 @@ def test_create_task_defaults_to_queued() -> None:
                 device_id=ids["device_id"],
                 profile_id=ids["profile_id"],
                 message_template_id=ids["template_id"],
-                payload={"send_greeting": True},
             ),
         )
 
         assert task.status == TaskStatus.QUEUED.value
-        assert task.payload["send_greeting"] is True
+        assert task.payload == {}
 
 
 def test_task_executor_runs_start_chat_flow() -> None:
@@ -74,7 +73,6 @@ def test_task_executor_runs_start_chat_flow() -> None:
                 device_id=ids["device_id"],
                 profile_id=ids["profile_id"],
                 message_template_id=ids["template_id"],
-                payload={"send_greeting": True},
             ),
         )
 
@@ -91,4 +89,8 @@ def test_task_executor_runs_start_chat_flow() -> None:
         assert len(db_task.runs) == 1
         assert db_task.runs[0].result == "succeeded"
         assert db_task.runs[0].raw_output["steps"][1]["action"] == "start_chat"
+        assert len(db_task.runs[0].raw_output["steps"]) == 2
+        assert not any(
+            operation["action"] == "type_text" for operation in db_task.runs[0].raw_output["driver_operations"]
+        )
         assert len(dedupe) == 1
