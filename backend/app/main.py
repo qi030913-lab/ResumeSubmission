@@ -11,8 +11,9 @@ from app.db.session import SessionLocal, init_database
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_database()
-    with SessionLocal() as session:
-        seed_reference_data(session)
+    if get_settings().database_seed_reference_data:
+        with SessionLocal() as session:
+            seed_reference_data(session)
     yield
 
 

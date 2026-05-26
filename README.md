@@ -32,17 +32,16 @@
 - 项目目录结构设计
 - 数据库表设计草案
 - API 设计草案
-- SQLAlchemy 数据模型和 SQLite 本地持久化
+- SQLAlchemy 数据模型和 SQLite / PostgreSQL 配置
 - FastAPI CRUD API
 - Celery worker 入口和本地 eager 执行
-- Boss Android adapter / mock Android driver
+- Boss Android adapter / `mock` / `appium` 双驱动结构
 - 任务执行记录、去重记录、执行日志落库
+- Alembic 初始迁移
 - 基础测试通过
 
 暂未完成：
 
-- Alembic 迁移
-- 真实 Appium driver 实现
 - 真实 Boss `立即沟通` 点击链路
 - 截图归档、回放、风控识别
 
@@ -77,7 +76,7 @@
 
 - 后端控制平面：`Python 3.11+`、`FastAPI`
 - 数据建模：`Pydantic v2`
-- ORM / 迁移：`SQLAlchemy 2`、`Alembic`（待接入）
+- ORM / 迁移：`SQLAlchemy 2`、`Alembic`
 - 异步任务：`Celery`、`Redis`
 - 网页执行器：`Playwright Python`
 - Android 执行器：`Appium Python Client`、`UiAutomator2`、`ADB`
@@ -150,11 +149,20 @@ copy .env.example .env
 按实际情况修改：
 
 - `DATABASE_URL`
+- `DATABASE_AUTO_CREATE`
 - `REDIS_URL`
 - `CELERY_BROKER_URL`
 - `CELERY_RESULT_BACKEND`
+- `ANDROID_DRIVER_MODE`
+- `APPIUM_SERVER_URL`
 
-### 4. 启动 API
+### 4. 执行数据库迁移
+
+```bash
+alembic -c alembic.ini upgrade head
+```
+
+### 5. 启动 API
 
 ```bash
 uvicorn app.main:app --reload
@@ -165,10 +173,16 @@ uvicorn app.main:app --reload
 - API: `http://127.0.0.1:8000`
 - OpenAPI: `http://127.0.0.1:8000/docs`
 
-### 5. 启动 Celery Worker
+### 6. 启动 Celery Worker
 
 ```bash
 celery -A app.workers.celery_app:celery_app worker --loglevel=info
+```
+
+### 7. 本地 PostgreSQL / Redis
+
+```bash
+docker compose -f docker-compose.services.yml up -d
 ```
 
 ## 当前可用接口
@@ -210,11 +224,11 @@ celery -A app.workers.celery_app:celery_app worker --loglevel=info
 
 建议开发顺序：
 
-1. 接 Alembic 初始迁移
-2. 接真实 Appium Android driver
-3. 把 `boss_android_adapter.py` 的 mock 点击替换成真实设备操作
-4. 增加截图归档和失败回放
-5. 增加风控识别和人工审核流
+1. 把 `boss_android_adapter.py` 里的通用点击换成真实 Boss 选择器
+2. 增加截图归档和失败回放
+3. 增加风控识别和人工审核流
+4. 把 SQLite 开发模式和 PostgreSQL 部署模式进一步拆清
+5. 增加实际 Appium 集成测试
 
 ## 相关文档
 
@@ -236,5 +250,5 @@ celery -A app.workers.celery_app:celery_app worker --loglevel=info
 
 最值得立刻继续的两块：
 
-- 接上 `PostgreSQL + Alembic`
-- 开始实现 Boss Android 的 `Appium + ADB` 真正执行链路
+- 采集 Boss 直聘真实元素选择器并接入 `Appium + ADB`
+- 增加 PostgreSQL + Alembic 的正式部署说明

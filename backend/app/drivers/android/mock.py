@@ -7,6 +7,7 @@ from app.drivers.android.base import AndroidDriver
 
 @dataclass
 class MockAndroidDriver(AndroidDriver):
+    driver_type: str = "mock_android"
     operations: list[dict] = field(default_factory=list)
     screenshot_count: int = 0
 
@@ -36,3 +37,9 @@ class MockAndroidDriver(AndroidDriver):
 
     async def back(self) -> None:
         self.operations.append({"action": "back"})
+
+    async def close(self) -> None:
+        self.operations.append({"action": "close"})
+
+    def export_debug_trace(self) -> list[dict]:
+        return list(self.operations)

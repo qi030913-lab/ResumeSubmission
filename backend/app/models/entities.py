@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from datetime import UTC, date, datetime
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, JSON, String, Text
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+from app.models.types import json_type
 
 
 class CandidateProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -13,9 +14,9 @@ class CandidateProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     name: Mapped[str] = mapped_column(String(128))
     headline: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    base_info: Mapped[dict] = mapped_column(JSON, default=dict)
+    base_info: Mapped[dict] = mapped_column(json_type, default=dict)
     availability_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-    preferred_roles: Mapped[list] = mapped_column(JSON, default=list)
+    preferred_roles: Mapped[list] = mapped_column(json_type, default=list)
 
 
 class PlatformRegistry(UUIDPrimaryKeyMixin, Base):
@@ -28,7 +29,7 @@ class PlatformRegistry(UUIDPrimaryKeyMixin, Base):
     adapter_code: Mapped[str] = mapped_column(String(128))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     health_status: Mapped[str] = mapped_column(String(32), default="healthy")
-    supported_actions: Mapped[list] = mapped_column(JSON, default=list)
+    supported_actions: Mapped[list] = mapped_column(json_type, default=list)
     last_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
@@ -40,7 +41,7 @@ class Device(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     device_name: Mapped[str] = mapped_column(String(128))
     adb_serial: Mapped[str | None] = mapped_column(String(128), nullable=True)
     status: Mapped[str] = mapped_column(String(32), default="idle")
-    capabilities: Mapped[dict] = mapped_column(JSON, default=dict)
+    capabilities: Mapped[dict] = mapped_column(json_type, default=dict)
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
@@ -56,7 +57,7 @@ class Job(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     recruiter_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
     recruiter_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     job_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    job_snapshot: Mapped[dict] = mapped_column(JSON, default=dict)
+    job_snapshot: Mapped[dict] = mapped_column(json_type, default=dict)
 
 
 class MessageTemplate(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -66,7 +67,7 @@ class MessageTemplate(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     scene_code: Mapped[str] = mapped_column(String(64))
     title: Mapped[str] = mapped_column(String(128))
     template_text: Mapped[str] = mapped_column(Text)
-    variables: Mapped[list] = mapped_column(JSON, default=list)
+    variables: Mapped[list] = mapped_column(json_type, default=list)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
@@ -83,7 +84,7 @@ class ApplicationTask(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     profile_id: Mapped[str] = mapped_column(ForeignKey("candidate_profiles.id"))
     message_template_id: Mapped[str | None] = mapped_column(ForeignKey("message_templates.id"), nullable=True)
     requires_manual_review: Mapped[bool] = mapped_column(Boolean, default=True)
-    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    payload: Mapped[dict] = mapped_column(json_type, default=dict)
     worker_job_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     dispatched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -104,9 +105,9 @@ class ApplicationRun(UUIDPrimaryKeyMixin, Base):
     result: Mapped[str] = mapped_column(String(32), default="running")
     error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
-    screenshot_urls: Mapped[list] = mapped_column(JSON, default=list)
+    screenshot_urls: Mapped[list] = mapped_column(json_type, default=list)
     trace_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    raw_output: Mapped[dict] = mapped_column(JSON, default=dict)
+    raw_output: Mapped[dict] = mapped_column(json_type, default=dict)
 
     task: Mapped[ApplicationTask] = relationship(back_populates="runs")
     logs: Mapped[list[ApplicationLog]] = relationship(back_populates="run", cascade="all, delete-orphan")
@@ -120,7 +121,7 @@ class ApplicationLog(UUIDPrimaryKeyMixin, Base):
     level: Mapped[str] = mapped_column(String(16), default="info")
     event_type: Mapped[str] = mapped_column(String(64))
     message: Mapped[str] = mapped_column(Text)
-    details: Mapped[dict] = mapped_column(JSON, default=dict)
+    details: Mapped[dict] = mapped_column(json_type, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     task: Mapped[ApplicationTask] = relationship(back_populates="logs")

@@ -11,3 +11,5 @@ backend/.ruff_cache/
 backend/.coverage
 *.egg-info/
 *.db
+artifacts/
+backend/artifacts/

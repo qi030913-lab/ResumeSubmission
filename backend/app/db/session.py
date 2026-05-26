@@ -24,7 +24,8 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, expi
 
 
 def init_database() -> None:
-    Base.metadata.create_all(bind=engine)
+    if settings.database_auto_create:
+        Base.metadata.create_all(bind=engine)
 
 
 def get_db_session() -> Generator[Session, None, None]:
