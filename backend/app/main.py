@@ -1,6 +1,13 @@
+from __future__ import annotations
+
+import sys
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.api.router import api_router
 from app.bootstrap import seed_reference_data
@@ -30,3 +37,10 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    settings = get_settings()
+    uvicorn.run(app, host=settings.app_host, port=settings.app_port)

@@ -9,6 +9,7 @@ __pycache__/
 backend/.env
 backend/.ruff_cache/
 backend/.coverage
+backend/logs/
 *.egg-info/
 *.db
 artifacts/

@@ -12,7 +12,7 @@ def test_adb_escape_input_text_handles_spaces_and_symbols() -> None:
 
 
 def test_registry_builds_mock_driver_by_default(monkeypatch) -> None:
-    monkeypatch.delenv("ANDROID_DRIVER_MODE", raising=False)
+    monkeypatch.setenv("ANDROID_DRIVER_MODE", "mock")
     get_settings.cache_clear()
 
     adapter, driver = AdapterRegistry().build("boss_android", "android_app")
